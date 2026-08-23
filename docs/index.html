@@ -2,11 +2,547 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>chronos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chronos: a CPU scheduler in Rust</title>
+<meta name="description" content="Chronos is a CPU scheduler in Rust that runs FIFO, SJF, round-robin, priority, and MLFQ over real processes and reports the actual turnaround, waiting, and response times.">
+<meta name="author" content="Pavan Nallamothu">
+<link rel="canonical" href="https://pavanchow.github.io/chronos/">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Chronos: a CPU scheduler in Rust">
+<meta property="og:description" content="Chronos is a CPU scheduler in Rust that runs FIFO, SJF, round-robin, priority, and MLFQ over real processes and reports the actual turnaround, waiting, and response times.">
+<meta property="og:url" content="https://pavanchow.github.io/chronos/">
+<meta property="og:site_name" content="Chronos">
+<meta name="twitter:card" content="summary">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Chronos",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Cross-platform",
+  "description": "Chronos is a CPU scheduler in Rust that runs FIFO, SJF, round-robin, priority, and MLFQ over real processes and reports the actual turnaround, waiting, and response times.",
+  "author": { "@type": "Person", "name": "Pavan Nallamothu" },
+  "url": "https://pavanchow.github.io/chronos/",
+  "codeRepository": "https://github.com/pavanchow/chronos",
+  "programmingLanguage": "Rust"
+}
+</script>
+
+<style>
+  :root{
+    --accent:#c0562a;--accent-soft:#fbeee6;
+    --ink:#15161c;--muted:#6a6d78;--faint:#9a9dab;
+    --line:#ececed;--panel:#f7f7f9;--panel2:#fbfbfd;
+    --mono:ui-monospace,SFMono-Regular,Menlo,"SF Mono",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:#fff;color:var(--ink);
+    font:17px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 28px}
+  a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+
+  nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line)}
+  nav .row{display:flex;justify-content:space-between;align-items:center;height:56px;max-width:1040px;margin:0 auto;padding:0 28px}
+  nav .brand{display:flex;align-items:center;gap:9px;font-size:18px;font-weight:650;letter-spacing:-.01em}
+  nav .brand .gem{width:16px;height:16px;transform:rotate(45deg);border-radius:3px;background:linear-gradient(135deg,#e8a27a,#c0562a)}
+  nav .links{display:flex;gap:26px;align-items:center}
+  nav .links a{color:var(--ink);font-size:14.5px}
+  @media(max-width:640px){nav .links a:not(.gh){display:none}}
+
+  .hero{padding:70px 0 30px;text-align:center}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+  h1{font-size:clamp(38px,6.6vw,66px);line-height:1.05;letter-spacing:-.035em;font-weight:680;margin:18px 0 0}
+  .hero p.sub{max-width:640px;margin:24px auto 0;font-size:clamp(17px,2.1vw,21px);color:var(--muted)}
+
+  .stage{max-width:960px;margin:44px auto 0;padding:0 28px}
+  .card{position:relative;background:linear-gradient(180deg,#fffaf7,#faf4f1);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 1px 0 #fff inset,0 18px 50px -30px rgba(90,50,20,.28);padding:26px}
+
+  .controls-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  .controls-row label{font-family:var(--mono);font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-right:6px}
+  select, .qty-input{font-family:var(--mono);font-size:13px;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+  select:focus, .qty-input:focus{outline:none;border-color:var(--accent)}
+  .qty-input{width:64px}
+  .field-group{display:flex;align-items:center;gap:6px}
+
+  .procs-editor{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:16px}
+  .procs-editor .hdr{display:grid;grid-template-columns:34px 1fr 1fr 1fr 30px;gap:8px;font-family:var(--mono);font-size:10.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.05em;padding:0 2px 8px}
+  .proc-row{display:grid;grid-template-columns:34px 1fr 1fr 1fr 30px;gap:8px;align-items:center;margin-bottom:6px}
+  .proc-row .pid{font-family:var(--mono);font-size:13px;font-weight:700}
+  .proc-row input{width:100%;font-family:var(--mono);font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+  .proc-row input:focus{outline:none;border-color:var(--accent)}
+  .proc-row button{cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:8px;font-size:14px;line-height:1;padding:6px 0}
+  .proc-row button:hover{border-color:var(--accent);color:var(--accent)}
+  .editor-actions{display:flex;gap:10px;margin-top:6px}
+  .editor-actions button{cursor:pointer;font:600 12.5px var(--mono);padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+  .editor-actions button:hover{border-color:var(--accent);color:var(--accent)}
+
+  .gantt-wrap{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:18px;overflow-x:auto}
+  .gantt{display:flex;min-width:max-content}
+  .gblock{position:relative;height:52px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:700;color:#fff;border-right:2px solid #fff;white-space:nowrap;padding:0 4px}
+  .gblock.idle{background:repeating-linear-gradient(45deg,#e8e8ec,#e8e8ec 6px,#f4f4f6 6px,#f4f4f6 12px);color:var(--faint)}
+  .gaxis{display:flex;min-width:max-content;margin-top:4px}
+  .gtick{font-family:var(--mono);font-size:10.5px;color:var(--faint);border-right:2px solid transparent;padding-left:2px}
+
+  table.metrics{width:100%;border-collapse:collapse;margin-top:18px;font-family:var(--mono);font-size:12.5px}
+  table.metrics th, table.metrics td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+  table.metrics th{color:var(--faint);text-transform:uppercase;font-size:10.5px;letter-spacing:.04em;font-weight:600}
+  table.metrics td.pidcell{font-weight:700}
+  .avg-row{margin-top:12px;display:flex;gap:22px;flex-wrap:wrap;font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+  .avg-row b{color:var(--ink)}
+
+  section{padding:92px 0;border-top:1px solid var(--line)}
+  h2{font-size:clamp(27px,4.2vw,42px);line-height:1.12;letter-spacing:-.025em;font-weight:660;text-align:center;max-width:760px;margin:0 auto}
+  .lead{max-width:620px;margin:22px auto 0;text-align:center;color:var(--muted);font-size:18px}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:900px;margin:48px auto 0}
+  @media(max-width:720px){.steps{grid-template-columns:1fr}}
+  .step{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:24px}
+  .step .n{display:inline-flex;width:28px;height:28px;border-radius:8px;background:var(--accent-soft);color:var(--accent);align-items:center;justify-content:center;font:700 13px var(--mono);margin-bottom:12px}
+  .step h3{font-size:17px;margin-bottom:6px}.step p{color:var(--muted);font-size:15px}
+  pre{background:#15161c;color:#ececf4;border-radius:14px;padding:20px 22px;font-family:var(--mono);font-size:13.5px;overflow-x:auto;max-width:640px;margin:40px auto 0}
+  pre .c{color:#8a8d9a}
+  footer{padding:64px 0;border-top:1px solid var(--line);text-align:center;color:var(--muted)}
+  footer .name{color:var(--ink);font-weight:600}
+  @media(max-width:640px){
+    .procs-editor .hdr{display:none}
+    .proc-row{grid-template-columns:24px 1fr 1fr 1fr 26px}
+  }
+</style>
 </head>
 <body>
-<h1>chronos</h1>
-<p>Site coming soon.</p>
-<p><a href="https://github.com/pavanchow/chronos">View repository</a></p>
+  <nav><div class="row">
+    <div class="brand"><span class="gem"></span>Chronos</div>
+    <div class="links">
+      <a href="#demo">Demo</a><a href="#how">How it works</a><a href="#source">Source</a>
+      <a class="gh" href="https://github.com/pavanchow/chronos">GitHub</a>
+    </div>
+  </div></nav>
+
+  <div id="demo" class="hero">
+    <p class="eyebrow">Rust · clap only · no fabricated numbers</p>
+    <h1>Gantt charts, run for real,<br>not sketched on a whiteboard.</h1>
+    <p class="sub">Chronos is a CPU scheduler in Rust. It simulates FIFO, SJF, round-robin, priority, and MLFQ over a set of processes and reports the actual completion, turnaround, waiting, and response times. Here is the real algorithm, running in your browser.</p>
+  </div>
+
+  <div class="stage">
+    <div class="card">
+      <div class="controls-row">
+        <div class="field-group">
+          <label for="algo">Algorithm</label>
+          <select id="algo">
+            <option value="fifo">FIFO</option>
+            <option value="sjf">SJF</option>
+            <option value="rr" selected>Round robin</option>
+            <option value="priority">Priority</option>
+            <option value="mlfq">MLFQ</option>
+          </select>
+        </div>
+        <div class="field-group" id="quantumGroup">
+          <label for="quantum">Quantum</label>
+          <input class="qty-input" id="quantum" type="number" min="1" value="2">
+        </div>
+      </div>
+
+      <div class="procs-editor">
+        <div class="hdr"><span>PID</span><span>Arrival</span><span>Burst</span><span>Priority</span><span></span></div>
+        <div id="procRows"></div>
+        <div class="editor-actions">
+          <button id="addProc" type="button">+ Add process</button>
+          <button id="resetProcs" type="button">Reset sample</button>
+        </div>
+      </div>
+
+      <div class="gantt-wrap">
+        <div class="gantt" id="ganttChart"></div>
+        <div class="gaxis" id="ganttAxis"></div>
+      </div>
+
+      <table class="metrics">
+        <thead><tr><th>PID</th><th>Arrival</th><th>Burst</th><th>Completion</th><th>Turnaround</th><th>Waiting</th><th>Response</th></tr></thead>
+        <tbody id="metricsBody"></tbody>
+      </table>
+      <div class="avg-row" id="avgRow"></div>
+    </div>
+  </div>
+
+  <section id="how">
+    <h2>How each scheduler decides.</h2>
+    <p class="lead">The same five algorithms the Rust binary runs, ported line for line into the demo above.</p>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h3>FIFO</h3><p>Sorted by arrival time, ties by id. Runs each process to completion in that order, no interruption.</p></div>
+      <div class="step"><div class="n">2</div><h3>SJF</h3><p>Non-preemptive. Among processes that have arrived, always picks the smallest remaining burst next.</p></div>
+      <div class="step"><div class="n">3</div><h3>Round robin</h3><p>Every ready process gets a fixed quantum, cycling through the queue until each one finishes.</p></div>
+      <div class="step"><div class="n">4</div><h3>Priority</h3><p>Non-preemptive. Picks the lowest priority value among arrived processes, lower value runs first.</p></div>
+      <div class="step"><div class="n">5</div><h3>MLFQ</h3><p>Three levels, quantum 4 then 8 then FCFS. A process that burns its whole quantum gets demoted a level.</p></div>
+      <div class="step"><div class="n">6</div><h3>Metrics</h3><p>Completion, turnaround, waiting, and response are computed from the real timeline, then averaged.</p></div>
+    </div>
+  </section>
+
+  <section id="source">
+    <h2>Run it from the command line.</h2>
+    <p class="lead">The same simulation, printed as a Gantt chart and a metrics table.</p>
+    <pre><span class="c"># round robin, quantum 2, three processes</span>
+cargo run -- run --algo rr --quantum 2 --procs "0:5,1:3,2:8"</pre>
+  </section>
+
+  <noscript>
+    <div class="wrap" style="padding:40px 28px;color:#6a6d78">
+      Chronos is a CPU scheduler in Rust that simulates FIFO, SJF, round-robin, priority, and MLFQ scheduling over a set of processes and reports the real completion, turnaround, waiting, and response times for each one, plus the averages across the whole run. Source at github.com/pavanchow/chronos. By Pavan Nallamothu.
+    </div>
+  </noscript>
+
+  <footer>
+    <p>A scheduler you can trace by hand, and then watch run.</p>
+    <p style="margin-top:12px"><a href="https://github.com/pavanchow/chronos">github.com/pavanchow/chronos</a></p>
+    <p style="margin-top:12px">By <span class="name">Pavan Nallamothu</span>.</p>
+  </footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- scheduler.rs, ported ----
+  function arrivalOrder(procs) {
+    return procs.map(function (p, i) { return i; }).sort(function (a, b) {
+      if (procs[a].arrival !== procs[b].arrival) return procs[a].arrival - procs[b].arrival;
+      return procs[a].id - procs[b].id;
+    });
+  }
+
+  function coalesce(slices) {
+    var out = [];
+    slices = slices.filter(function (s) { return s.start < s.end; });
+    for (var i = 0; i < slices.length; i++) {
+      var s = slices[i];
+      var last = out[out.length - 1];
+      if (last && last.pid === s.pid && last.end === s.start) {
+        last.end = s.end;
+      } else {
+        out.push({ pid: s.pid, start: s.start, end: s.end });
+      }
+    }
+    return out;
+  }
+
+  function finalize(procs, completions, firstRun) {
+    var metrics = procs.map(function (p, i) {
+      var completion = completions[i];
+      var turnaround = completion - p.arrival;
+      var waiting = turnaround - p.burst;
+      var response = firstRun[i] - p.arrival;
+      return { id: p.id, arrival: p.arrival, burst: p.burst, completion: completion, turnaround: turnaround, waiting: waiting, response: response };
+    });
+    metrics.sort(function (a, b) { return a.id - b.id; });
+    var n = Math.max(metrics.length, 1);
+    var averages = {
+      turnaround: metrics.reduce(function (s, m) { return s + m.turnaround; }, 0) / n,
+      waiting: metrics.reduce(function (s, m) { return s + m.waiting; }, 0) / n,
+      response: metrics.reduce(function (s, m) { return s + m.response; }, 0) / n,
+    };
+    return { timeline: [], metrics: metrics, averages: averages };
+  }
+
+  function emptyResult() {
+    return { timeline: [], metrics: [], averages: { turnaround: 0, waiting: 0, response: 0 } };
+  }
+
+  function fifo(procs) {
+    if (procs.length === 0) return emptyResult();
+    var order = arrivalOrder(procs);
+    var time = 0, timeline = [];
+    var completions = new Array(procs.length), firstRun = new Array(procs.length);
+    order.forEach(function (i) {
+      var p = procs[i];
+      if (p.arrival > time) { timeline.push({ pid: null, start: time, end: p.arrival }); time = p.arrival; }
+      var start = time, end = start + p.burst;
+      firstRun[i] = start; completions[i] = end;
+      timeline.push({ pid: p.id, start: start, end: end });
+      time = end;
+    });
+    var result = finalize(procs, completions, firstRun);
+    result.timeline = coalesce(timeline);
+    return result;
+  }
+
+  function nonPreemptiveSelect(procs, cmp) {
+    if (procs.length === 0) return emptyResult();
+    var remaining = procs.map(function (_, i) { return i; });
+    var time = 0, timeline = [];
+    var completions = new Array(procs.length), firstRun = new Array(procs.length);
+    while (remaining.length > 0) {
+      var available = remaining.filter(function (i) { return procs[i].arrival <= time; });
+      if (available.length === 0) {
+        var nextArrival = Math.min.apply(null, remaining.map(function (i) { return procs[i].arrival; }));
+        timeline.push({ pid: null, start: time, end: nextArrival });
+        time = nextArrival;
+        continue;
+      }
+      var chosen = available.reduce(function (best, i) { return cmp(procs[i], procs[best]) < 0 ? i : best; }, available[0]);
+      var p = procs[chosen];
+      var start = time, end = start + p.burst;
+      firstRun[chosen] = start; completions[chosen] = end;
+      timeline.push({ pid: p.id, start: start, end: end });
+      time = end;
+      remaining = remaining.filter(function (i) { return i !== chosen; });
+    }
+    var result = finalize(procs, completions, firstRun);
+    result.timeline = coalesce(timeline);
+    return result;
+  }
+
+  function sjf(procs) {
+    return nonPreemptiveSelect(procs, function (a, b) {
+      if (a.burst !== b.burst) return a.burst - b.burst;
+      if (a.arrival !== b.arrival) return a.arrival - b.arrival;
+      return a.id - b.id;
+    });
+  }
+
+  function priorityScheduler(procs) {
+    return nonPreemptiveSelect(procs, function (a, b) {
+      if (a.priority !== b.priority) return a.priority - b.priority;
+      if (a.arrival !== b.arrival) return a.arrival - b.arrival;
+      return a.id - b.id;
+    });
+  }
+
+  function roundRobin(procs, quantum) {
+    if (procs.length === 0) return emptyResult();
+    quantum = Math.max(1, quantum | 0);
+    var order = arrivalOrder(procs);
+    var ptr = 0, n = procs.length;
+    var remainingBurst = procs.map(function (p) { return p.burst; });
+    var completions = new Array(n), firstRun = new Array(n).fill(null);
+    var ready = [], time = 0, timeline = [], finished = 0;
+
+    function admit(t) {
+      while (ptr < n && procs[order[ptr]].arrival <= t) { ready.push(order[ptr]); ptr++; }
+    }
+    admit(time);
+
+    while (finished < n) {
+      if (ready.length === 0) {
+        var nextArrival = procs[order[ptr]].arrival;
+        timeline.push({ pid: null, start: time, end: nextArrival });
+        time = nextArrival;
+        admit(time);
+        continue;
+      }
+      var pidIdx = ready.shift();
+      var run = Math.min(quantum, remainingBurst[pidIdx]);
+      var start = time, end = start + run;
+      if (firstRun[pidIdx] === null) firstRun[pidIdx] = start;
+      remainingBurst[pidIdx] -= run;
+      time = end;
+      timeline.push({ pid: procs[pidIdx].id, start: start, end: end });
+      admit(time);
+      if (remainingBurst[pidIdx] === 0) { completions[pidIdx] = end; finished++; }
+      else { ready.push(pidIdx); }
+    }
+    var result = finalize(procs, completions, firstRun);
+    result.timeline = coalesce(timeline);
+    return result;
+  }
+
+  function mlfq(procs) {
+    var LEVELS = 3, QUANTA = [4, 8, Infinity];
+    if (procs.length === 0) return emptyResult();
+    var order = arrivalOrder(procs);
+    var ptr = 0, n = procs.length;
+    var remainingBurst = procs.map(function (p) { return p.burst; });
+    var completions = new Array(n), firstRun = new Array(n).fill(null);
+    var queues = [[], [], []], time = 0, timeline = [], finished = 0;
+
+    function admit(t) {
+      while (ptr < n && procs[order[ptr]].arrival <= t) { queues[0].push(order[ptr]); ptr++; }
+    }
+    admit(time);
+
+    while (finished < n) {
+      var level = -1;
+      for (var l = 0; l < LEVELS; l++) { if (queues[l].length > 0) { level = l; break; } }
+      if (level === -1) {
+        var nextArrival = procs[order[ptr]].arrival;
+        timeline.push({ pid: null, start: time, end: nextArrival });
+        time = nextArrival;
+        admit(time);
+        continue;
+      }
+      var pidIdx = queues[level].shift();
+      var quantum = QUANTA[level];
+      var run = Math.min(quantum, remainingBurst[pidIdx]);
+      var start = time, end = start + run;
+      if (firstRun[pidIdx] === null) firstRun[pidIdx] = start;
+      remainingBurst[pidIdx] -= run;
+      time = end;
+      timeline.push({ pid: procs[pidIdx].id, start: start, end: end });
+      admit(time);
+      if (remainingBurst[pidIdx] === 0) { completions[pidIdx] = end; finished++; }
+      else { var nextLevel = Math.min(level + 1, LEVELS - 1); queues[nextLevel].push(pidIdx); }
+    }
+    var result = finalize(procs, completions, firstRun);
+    result.timeline = coalesce(timeline);
+    return result;
+  }
+
+  // ---- demo wiring ----
+  var PALETTE = ["#c0562a", "#5b7fd6", "#3ba26a", "#b5497e", "#9a8a2e", "#4a9ab0", "#8a5bd6", "#c08a2a"];
+  function colorFor(pid) { return PALETTE[pid % PALETTE.length]; }
+
+  var sample = [
+    { id: 0, arrival: 0, burst: 5, priority: 2 },
+    { id: 1, arrival: 1, burst: 3, priority: 1 },
+    { id: 2, arrival: 2, burst: 8, priority: 3 },
+    { id: 3, arrival: 4, burst: 2, priority: 0 },
+  ];
+
+  var procRowsEl = document.getElementById("procRows");
+  var algoSel = document.getElementById("algo");
+  var quantumInput = document.getElementById("quantum");
+  var quantumGroup = document.getElementById("quantumGroup");
+
+  function currentProcs() {
+    var rows = procRowsEl.querySelectorAll(".proc-row");
+    var procs = [];
+    rows.forEach(function (row, i) {
+      var arrival = parseInt(row.querySelector(".f-arrival").value, 10);
+      var burst = parseInt(row.querySelector(".f-burst").value, 10);
+      var priority = parseInt(row.querySelector(".f-priority").value, 10);
+      procs.push({
+        id: i,
+        arrival: isNaN(arrival) || arrival < 0 ? 0 : arrival,
+        burst: isNaN(burst) || burst < 1 ? 1 : burst,
+        priority: isNaN(priority) ? i : priority,
+      });
+    });
+    return procs;
+  }
+
+  function renderRows(procs) {
+    procRowsEl.innerHTML = "";
+    procs.forEach(function (p, i) {
+      var row = document.createElement("div");
+      row.className = "proc-row";
+      row.innerHTML =
+        '<span class="pid">P' + i + '</span>' +
+        '<input class="f-arrival" type="number" min="0" value="' + p.arrival + '">' +
+        '<input class="f-burst" type="number" min="1" value="' + p.burst + '">' +
+        '<input class="f-priority" type="number" value="' + p.priority + '">' +
+        '<button type="button" class="rm" title="Remove">&times;</button>';
+      procRowsEl.appendChild(row);
+    });
+    bindRowEvents();
+  }
+
+  function bindRowEvents() {
+    procRowsEl.querySelectorAll("input").forEach(function (el) {
+      el.oninput = run;
+    });
+    procRowsEl.querySelectorAll(".rm").forEach(function (btn) {
+      btn.onclick = function () {
+        var procs = currentProcs();
+        var idx = Array.prototype.indexOf.call(procRowsEl.children, btn.closest(".proc-row"));
+        if (procs.length <= 1) return;
+        procs.splice(idx, 1);
+        renderRows(procs);
+        run();
+      };
+    });
+  }
+
+  document.getElementById("addProc").onclick = function () {
+    var procs = currentProcs();
+    var lastArrival = procs.length ? procs[procs.length - 1].arrival : 0;
+    procs.push({ id: procs.length, arrival: lastArrival + 1, burst: 3, priority: procs.length });
+    renderRows(procs);
+    run();
+  };
+
+  document.getElementById("resetProcs").onclick = function () {
+    renderRows(sample);
+    algoSel.value = "rr";
+    quantumInput.value = 2;
+    updateQuantumVisibility();
+    run();
+  };
+
+  function updateQuantumVisibility() {
+    quantumGroup.style.display = (algoSel.value === "rr" || algoSel.value === "mlfq") ? "" : "none";
+    quantumGroup.querySelector("label").textContent = algoSel.value === "mlfq" ? "Level-0 quantum (ref.)" : "Quantum";
+  }
+
+  algoSel.onchange = function () { updateQuantumVisibility(); run(); };
+  quantumInput.oninput = run;
+
+  function run() {
+    var procs = currentProcs();
+    if (procs.length === 0) return;
+    var algo = algoSel.value;
+    var quantum = Math.max(1, parseInt(quantumInput.value, 10) || 1);
+    var result;
+    if (algo === "fifo") result = fifo(procs);
+    else if (algo === "sjf") result = sjf(procs);
+    else if (algo === "rr") result = roundRobin(procs, quantum);
+    else if (algo === "priority") result = priorityScheduler(procs);
+    else result = mlfq(procs);
+    renderGantt(result);
+    renderMetrics(result);
+  }
+
+  function renderGantt(result) {
+    var gantt = document.getElementById("ganttChart");
+    var axis = document.getElementById("ganttAxis");
+    gantt.innerHTML = "";
+    axis.innerHTML = "";
+    if (result.timeline.length === 0) return;
+    var totalSpan = result.timeline[result.timeline.length - 1].end - result.timeline[0].start;
+    var pxPerUnit = Math.max(18, Math.min(60, 760 / Math.max(totalSpan, 1)));
+
+    result.timeline.forEach(function (s) {
+      var width = (s.end - s.start) * pxPerUnit;
+      var block = document.createElement("div");
+      block.className = "gblock" + (s.pid === null ? " idle" : "");
+      block.style.width = width + "px";
+      block.style.background = s.pid === null ? "" : colorFor(s.pid);
+      block.textContent = s.pid === null ? "idle" : "P" + s.pid;
+      gantt.appendChild(block);
+
+      var tick = document.createElement("div");
+      tick.className = "gtick";
+      tick.style.width = width + "px";
+      tick.textContent = s.start;
+      axis.appendChild(tick);
+    });
+    var lastTick = document.createElement("div");
+    lastTick.className = "gtick";
+    lastTick.textContent = result.timeline[result.timeline.length - 1].end;
+    axis.appendChild(lastTick);
+  }
+
+  function renderMetrics(result) {
+    var body = document.getElementById("metricsBody");
+    body.innerHTML = "";
+    result.metrics.forEach(function (m) {
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        '<td class="pidcell" style="color:' + colorFor(m.id) + '">P' + m.id + '</td>' +
+        '<td>' + m.arrival + '</td><td>' + m.burst + '</td><td>' + m.completion + '</td>' +
+        '<td>' + m.turnaround + '</td><td>' + m.waiting + '</td><td>' + m.response + '</td>';
+      body.appendChild(tr);
+    });
+    var avgRow = document.getElementById("avgRow");
+    avgRow.innerHTML =
+      '<span>Avg turnaround <b>' + result.averages.turnaround.toFixed(2) + '</b></span>' +
+      '<span>Avg waiting <b>' + result.averages.waiting.toFixed(2) + '</b></span>' +
+      '<span>Avg response <b>' + result.averages.response.toFixed(2) + '</b></span>';
+  }
+
+  renderRows(sample);
+  updateQuantumVisibility();
+  run();
+})();
+</script>
 </body>
 </html>

@@ -1,0 +1,18 @@
+[package]
+name = "chronos"
+version = "0.1.0"
+edition = "2021"
+authors = ["Pavan Nallamothu"]
+description = "A CPU scheduler simulator in Rust"
+license = "MIT"
+
+[lib]
+name = "chronos"
+path = "src/lib.rs"
+
+[[bin]]
+name = "chronos"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
