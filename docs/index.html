@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chronos: a CPU scheduler in Rust</title>
 <meta name="description" content="Chronos is a CPU scheduler in Rust that runs FIFO, SJF, round-robin, priority, and MLFQ over real processes and reports the actual turnaround, waiting, and response times.">
-<meta name="author" content="Pavan Nallamothu">
+<meta name="author" content="Pavan Nallamothu (pavanchow)">
 <link rel="canonical" href="https://pavanchow.github.io/chronos/">
 
 <meta property="og:type" content="website">
@@ -110,6 +110,10 @@
     .proc-row{grid-template-columns:24px 1fr 1fr 1fr 26px}
   }
 </style>
+<link rel="author" href="https://github.com/pavanchow">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Person","name":"Pavan Nallamothu","alternateName":"pavanchow","url":"https://github.com/pavanchow","sameAs":["https://github.com/pavanchow","https://hackerone.com/pavanchow"]}
+</script>
 </head>
 <body>
   <nav><div class="row">
@@ -189,7 +193,7 @@ cargo run -- run --algo rr --quantum 2 --procs "0:5,1:3,2:8"</pre>
 
   <noscript>
     <div class="wrap" style="padding:40px 28px;color:#6a6d78">
-      Chronos is a CPU scheduler in Rust that simulates FIFO, SJF, round-robin, priority, and MLFQ scheduling over a set of processes and reports the real completion, turnaround, waiting, and response times for each one, plus the averages across the whole run. Source at github.com/pavanchow/chronos. By Pavan Nallamothu.
+      Chronos is a CPU scheduler in Rust that simulates FIFO, SJF, round-robin, priority, and MLFQ scheduling over a set of processes and reports the real completion, turnaround, waiting, and response times for each one, plus the averages across the whole run. Source at github.com/pavanchow/chronos. By Pavan Nallamothu (pavanchow).
     </div>
   </noscript>
 
