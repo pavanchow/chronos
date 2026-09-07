@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Chronos logo">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e08a4f"/>
+      <stop offset="1" stop-color="#c0562a"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#g)"/>
+  <g fill="#fff">
+    <rect x="30" y="38" width="46" height="12" rx="4"/>
+    <rect x="44" y="56" width="54" height="12" rx="4" opacity="0.85"/>
+    <rect x="30" y="74" width="32" height="12" rx="4" opacity="0.7"/>
+  </g>
+  <g stroke="#fff" stroke-width="4" stroke-linecap="round">
+    <path d="M28 98 H100"/>
+    <path d="M40 98 V104" opacity="0.8"/>
+    <path d="M58 98 V104" opacity="0.8"/>
+    <path d="M76 98 V104" opacity="0.8"/>
+    <path d="M94 98 V104" opacity="0.8"/>
+  </g>
+</svg>

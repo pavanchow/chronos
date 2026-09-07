@@ -7,6 +7,7 @@
 <meta name="description" content="Chronos is a CPU scheduler in Rust that runs FIFO, SJF, round-robin, priority, and MLFQ over real processes and reports the actual turnaround, waiting, and response times.">
 <meta name="author" content="Pavan Nallamothu (pavanchow)">
 <link rel="canonical" href="https://pavanchow.github.io/chronos/">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="Chronos: a CPU scheduler in Rust">
@@ -105,6 +106,16 @@
   pre .c{color:#8a8d9a}
   footer{padding:64px 0;border-top:1px solid var(--line);text-align:center;color:var(--muted)}
   footer .name{color:var(--ink);font-weight:600}
+  details.howto{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:0 22px}
+  details.howto summary{cursor:pointer;list-style:none;padding:18px 0;font-weight:650;font-size:16px;display:flex;align-items:center;gap:10px}
+  details.howto summary::-webkit-details-marker{display:none}
+  details.howto summary::before{content:"";width:8px;height:8px;border-right:2px solid var(--accent);border-bottom:2px solid var(--accent);transform:rotate(-45deg);transition:transform .2s}
+  details.howto[open] summary::before{transform:rotate(45deg)}
+  details.howto .howtobody{padding:0 0 20px;color:var(--muted);font-size:15px}
+  details.howto .howtobody p{margin-bottom:10px}
+  details.howto .howtobody ul{margin:0 0 0 20px}
+  details.howto .howtobody li{margin:6px 0}
+  details.howto code{font-family:var(--mono);font-size:13px;background:var(--accent-soft);color:var(--accent);padding:1px 5px;border-radius:5px}
   @media(max-width:640px){
     .procs-editor .hdr{display:none}
     .proc-row{grid-template-columns:24px 1fr 1fr 1fr 26px}
@@ -125,6 +136,7 @@
   </div></nav>
 
   <div id="demo" class="hero">
+    <img src="logo.svg" alt="Chronos logo" width="76" height="76" style="display:block;margin:0 auto 6px">
     <p class="eyebrow">Rust · clap only · no fabricated numbers</p>
     <h1>Gantt charts, run for real,<br>not sketched on a whiteboard.</h1>
     <p class="sub">Chronos is a CPU scheduler in Rust. It simulates FIFO, SJF, round-robin, priority, and MLFQ over a set of processes and reports the actual completion, turnaround, waiting, and response times. Here is the real algorithm, running in your browser.</p>
@@ -169,6 +181,20 @@
       </table>
       <div class="avg-row" id="avgRow"></div>
     </div>
+  </div>
+
+  <div class="stage" style="margin-top:22px">
+    <details class="howto">
+      <summary>How to use this playground</summary>
+      <div class="howtobody">
+        <p>Chronos runs CPU scheduling algorithms for real: choose an algorithm, describe some processes, and watch the Gantt chart and metrics update instantly.</p>
+        <ul>
+          <li>Pick an <b>Algorithm</b>. For round robin and MLFQ, set the <b>Quantum</b> (the time slice).</li>
+          <li>Edit the process table: each row is an <code>arrival</code> time and a <code>burst</code> length, plus a <code>priority</code> for the priority scheduler. Use <b>+ Add process</b> or <b>Reset sample</b>.</li>
+          <li>Read the <b>Gantt chart</b> to see the exact run order, then the table for per-process completion, turnaround, waiting, and response times, with the averages below.</li>
+        </ul>
+      </div>
+    </details>
   </div>
 
   <section id="how">

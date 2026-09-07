@@ -1,3 +1,5 @@
+<img src="docs/logo.svg" alt="Chronos logo" width="96">
+
 # Chronos
 
 **A CPU scheduler in Rust that runs the algorithms instead of drawing them.**
