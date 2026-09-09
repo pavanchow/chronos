@@ -3,36 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chronos: a CPU scheduler in Rust</title>
-<meta name="description" content="Chronos is a CPU scheduler in Rust that runs FIFO, SJF, round-robin, priority, and MLFQ over real processes and reports the actual turnaround, waiting, and response times.">
-<meta name="author" content="Pavan Nallamothu (pavanchow)">
-<meta name="keywords" content="CPU scheduler, scheduling algorithms, FIFO, FCFS, SJF, round robin, priority scheduling, MLFQ, multi-level feedback queue, Gantt chart, turnaround time, waiting time, response time, operating systems, Rust, Pavan Nallamothu, pavanchow">
+<title>Chronos: CPU scheduler and scheduling simulator in Rust | Pavan Nallamothu</title>
+<meta name="description" content="Chronos by Pavan Nallamothu: a CPU scheduler in Rust running FIFO, SJF, round-robin, priority, and MLFQ over real processes with live turnaround and waiting times.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="author" content="Pavan Nallamothu">
+<meta name="keywords" content="chronos, CPU scheduler, scheduling algorithms, FIFO, FCFS, SJF, round robin, priority scheduling, MLFQ, multi-level feedback queue, Gantt chart, turnaround time, waiting time, response time, operating systems scheduling simulator, chronos rust, Pavan Nallamothu, pavanchow">
 <link rel="canonical" href="https://pavanchow.github.io/chronos/">
 <link rel="icon" type="image/svg+xml" href="logo.svg">
-
+<link rel="author" href="https://github.com/pavanchow">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Chronos: a CPU scheduler in Rust">
-<meta property="og:description" content="Chronos is a CPU scheduler in Rust that runs FIFO, SJF, round-robin, priority, and MLFQ over real processes and reports the actual turnaround, waiting, and response times.">
+<meta property="og:site_name" content="Pavan Nallamothu">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Chronos: CPU scheduler and scheduling simulator in Rust | Pavan Nallamothu">
+<meta property="og:description" content="A CPU scheduler in Rust running FIFO, SJF, round-robin, priority, and MLFQ over real processes, reporting actual turnaround, waiting, and response times. By Pavan Nallamothu.">
 <meta property="og:url" content="https://pavanchow.github.io/chronos/">
-<meta property="og:site_name" content="Chronos">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Chronos: a CPU scheduler in Rust">
-<meta name="twitter:description" content="Runs FIFO, SJF, round-robin, priority, and MLFQ over real processes and reports the actual turnaround, waiting, and response times. Live in your browser.">
-
+<meta property="og:image" content="https://pavanchow.github.io/chronos/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Chronos by Pavan Nallamothu">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@pavanchow">
+<meta name="twitter:creator" content="@pavanchow">
+<meta name="twitter:title" content="Chronos: CPU scheduler and scheduling simulator in Rust | Pavan Nallamothu">
+<meta name="twitter:description" content="A CPU scheduler in Rust running FIFO, SJF, round-robin, priority, and MLFQ over real processes, reporting actual turnaround, waiting, and response times.">
+<meta name="twitter:image" content="https://pavanchow.github.io/chronos/og-image.png">
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Chronos",
-  "applicationCategory": "DeveloperApplication",
-  "softwareVersion": "0.1.0",
-  "operatingSystem": "Cross-platform",
-  "description": "Chronos is a CPU scheduler in Rust that runs FIFO, SJF, round-robin, priority, and MLFQ over real processes and reports the actual turnaround, waiting, and response times.",
-  "author": { "@type": "Person", "name": "Pavan Nallamothu" },
-  "url": "https://pavanchow.github.io/chronos/",
-  "codeRepository": "https://github.com/pavanchow/chronos",
-  "programmingLanguage": "Rust"
-}
+{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://pavanchow.github.io/chronos/#app","name":"Chronos","applicationCategory":"DeveloperApplication","operatingSystem":"Cross-platform","softwareVersion":"0.1.0","description":"Chronos is a CPU scheduler in Rust that runs FIFO, SJF, round-robin, priority, and MLFQ over a set of processes and reports the real completion, turnaround, waiting, and response times for each one, plus the averages across the whole run.","url":"https://pavanchow.github.io/chronos/","image":"https://pavanchow.github.io/chronos/og-image.png","programmingLanguage":"Rust","codeRepository":"https://github.com/pavanchow/chronos","license":"https://opensource.org/licenses/MIT","datePublished":"2026-08-21","keywords":"CPU scheduler, scheduling algorithms, FIFO, SJF, round robin, priority scheduling, MLFQ, Gantt chart, turnaround time, waiting time, response time, Rust","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"featureList":["FIFO and shortest-job-first scheduling","Round-robin scheduling with a configurable quantum","Priority scheduling","Multi-level feedback queue (MLFQ)","Gantt chart of the real run","Turnaround, waiting, and response time metrics"],"author":{"@id":"https://github.com/pavanchow#person"},"publisher":{"@id":"https://github.com/pavanchow#person"}},{"@type":"Person","@id":"https://github.com/pavanchow#person","name":"Pavan Nallamothu","alternateName":"pavanchow","url":"https://github.com/pavanchow","jobTitle":"Software Engineer and Security Researcher","knowsAbout":["Rust","operating systems","CPU scheduling","algorithms","systems programming"],"sameAs":["https://github.com/pavanchow","https://hackerone.com/pavanchow"]},{"@type":"WebSite","name":"Chronos by Pavan Nallamothu","url":"https://pavanchow.github.io/chronos/","author":{"@id":"https://github.com/pavanchow#person"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Pavan Nallamothu","item":"https://github.com/pavanchow"},{"@type":"ListItem","position":2,"name":"Chronos","item":"https://pavanchow.github.io/chronos/"}]},{"@type":"WebPage","url":"https://pavanchow.github.io/chronos/","name":"Chronos: CPU scheduler and scheduling simulator in Rust | Pavan Nallamothu","isPartOf":{"@type":"WebSite","url":"https://pavanchow.github.io/chronos/"},"about":{"@id":"https://pavanchow.github.io/chronos/#app"},"author":{"@id":"https://github.com/pavanchow#person"},"inLanguage":"en"}]}
 </script>
 
 <style>
@@ -153,10 +149,6 @@
     .proc-row{grid-template-columns:24px 1fr 1fr 1fr 26px}
   }
 </style>
-<link rel="author" href="https://github.com/pavanchow">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Person","name":"Pavan Nallamothu","alternateName":"pavanchow","url":"https://github.com/pavanchow","sameAs":["https://github.com/pavanchow","https://hackerone.com/pavanchow"]}
-</script>
 </head>
 <body>
   <nav><div class="row">
@@ -302,6 +294,17 @@ cargo run -- run --algo mlfq --quantum 4 --procs "0:20,1:2"</pre>
     <p>A scheduler you can trace by hand, and then watch run.</p>
     <p style="margin-top:12px"><a href="https://github.com/pavanchow/chronos">github.com/pavanchow/chronos</a></p>
     <p style="margin-top:12px">By <span class="name">Pavan Nallamothu</span>.</p>
+    <nav class="more-tools" aria-label="More open-source tools by Pavan Nallamothu" style="margin-top:20px">
+      <p style="font-weight:600">More open-source tools by Pavan Nallamothu</p>
+      <p>
+        <a href="https://pavanchow.github.io/bedrock/">Bedrock, a virtual CPU and OS kernel</a> ·
+        <a href="https://pavanchow.github.io/cocoon/">Cocoon, a rootless Linux container runtime</a> ·
+        <a href="https://pavanchow.github.io/strata/">Strata, a file system in Rust</a> ·
+        <a href="https://pavanchow.github.io/ignition/">Ignition, a boot sequence simulator</a> ·
+        <a href="https://pavanchow.github.io/keystone/">Keystone, an LSM-tree key-value store</a> ·
+        <a href="https://github.com/pavanchow">All projects on GitHub</a>
+      </p>
+    </nav>
   </footer>
 
 <script>
