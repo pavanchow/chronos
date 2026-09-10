@@ -6,6 +6,8 @@ Chronos is a from-scratch CPU scheduling simulator in Rust that runs the algorit
 
 **[Live demo](https://pavanchow.github.io/chronos/)** · MIT licensed · pure Rust
 
+Built from scratch by [Pavan Nallamothu](https://pavanchow.github.io/) ([LinkedIn](https://www.linkedin.com/in/pavanchow/), [GitHub](https://github.com/pavanchow)).
+
 ## Algorithms
 
 - **FIFO (first-come first-served)** runs each process to completion in arrival order.
